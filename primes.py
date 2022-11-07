@@ -108,7 +108,7 @@ def random_prime(length, test_iterations = 7):
 
     Args:
         length (int): length of generated number
-        test_iterations (int): number of iterations on miller rabin test, default is 20
+        test_iterations (int): number of iterations on miller rabin test, default is 7
 
     Returns:
         int: random prime number
