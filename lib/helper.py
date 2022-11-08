@@ -1,7 +1,7 @@
 """Library with helper functions for rsa encryption
 """
 
-from primes import random_prime
+from lib.primes import random_prime
 
 def gcd(a, b):
     """Finds the greatest common divider of two numbers

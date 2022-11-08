@@ -5,9 +5,9 @@ https://www.comparitech.com/blog/information-security/rsa-encryption/ (understan
 https://www.zditect.com/guide/python/mod-inverse-python.html (mod inverse)
 """
 
-import numpy as np
-from primes import random_prime
-import helper as h
+from numpy import lcm as calc_lcm
+from lib.primes import random_prime
+import lib.helper as h
 
 class RSA():
     
@@ -46,7 +46,7 @@ class RSA():
         prime_multiple = p*q
 
         # Carmichaels totient
-        lcm = np.lcm.reduce(np.array([p-1, q-1]))
+        lcm = calc_lcm(p-1, q-1)
         
         # Generating e - second part of the public key
         if len(str(lcm)) <= 5:
@@ -74,7 +74,7 @@ class RSA():
         prime_multiple = p*q
 
         # Inverse modulo - second part of the private key
-        d = pow(self.public_key[1], -1, int(np.lcm.reduce(np.array([p-1, q-1]))))
+        d = pow(self.public_key[1], -1, int(calc_lcm(p-1, q-1)))
 
         return (prime_multiple, d)
     

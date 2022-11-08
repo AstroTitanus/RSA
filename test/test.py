@@ -1,11 +1,17 @@
-from rsa import RSA
+"""This test needs to be run from root folder 'rsa_cipher'
+"""
+
 import string
 import random
+import sys, os
+
+# Local imports
+sys.path.append(os.path.abspath('.'))
+from lib.rsa import RSA
 
 # list of chars to generate a random string from
 special_chars = list("ľščťžýáíéň§úřóď")
 alphabet = special_chars + list(string.ascii_letters) + list(string.ascii_lowercase) + list(string.ascii_uppercase) + list(string.digits) + list(string.hexdigits) + list(string.whitespace) + list(string.punctuation)
-
 
 def random_string(alphabet):
     """generates a random string of random length from 1 to 50
@@ -46,3 +52,5 @@ for i in range(1000):
 
     # Throw error if a mistake is detected
     assert random_str == decrypted
+
+print("ALL TESTS PASSED")
