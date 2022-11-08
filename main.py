@@ -18,7 +18,7 @@ def random_string(alphabet):
     return rand_string
 
 
-for i in range(10000):
+for i in range(100):
     rsa = RSA()
 
     to_encrypt = random_string(alphabet)

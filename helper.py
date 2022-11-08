@@ -84,10 +84,6 @@ def bin_to_str(bin_data):
     return decoded_str
 
 
-def split_to_groups(data, group_len):
-    return [data[i:i+group_len] for i in range(0, len(data), group_len)]
-
-
 def split_binary(bin_data, group_len):
     bin_groups = []
     bin_group = ''
@@ -96,7 +92,7 @@ def split_binary(bin_data, group_len):
         if i < group_len:
             bin_group += bool
 
-        # If the next bool is zero, append it to current group 
+        # If the next bool is zero, append it to the current group 
         else:
             if bool == '0':
                 bin_group += bool
