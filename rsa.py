@@ -28,8 +28,6 @@ class RSA():
         primes = {}
         primes['p'] = random_prime(self.prime_len)
         primes['q'] = random_prime(self.prime_len)
-        # primes['p'] = 907
-        # primes['q'] = 773
 
         return primes
     
@@ -89,15 +87,16 @@ class RSA():
         bin_message = h.str_to_bin(message)
 
         # Split binary to groups
-        bin_message_groupes = h.split_to_groups(bin_message, 16)
+        bin_message_groups = h.split_binary(bin_message, 32)
 
         # Encrypting
         result = ""
-        for bit_group in bin_message_groupes:
+        for i, bit_group in enumerate(bin_message_groups):
             num = int(bit_group, 2)
             pow_result = pow(num, e, n)
-            print(pow_result)
             result += str(pow_result)
+            # Output formatting
+            if i < len(bin_message_groups)-1: result += "\n"
 
         return result
     
@@ -106,8 +105,13 @@ class RSA():
         n = self.private_key[0]
         d = self.private_key[1]
 
+        encrypted_groups = encrypted.split("\n")
 
+        decrypted_bits = ""
+        for group in encrypted_groups:
+            decrypted_num = pow(int(group), d, n)
+            decrypted_bits += str(bin(decrypted_num)[2:])
+        
+        decrypted_string = h.bin_to_str(decrypted_bits)
 
-        result = pow(encrypted, d, n)
-
-        return result
+        return decrypted_string

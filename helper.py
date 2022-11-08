@@ -70,7 +70,14 @@ def bin_to_str(bin_data):
         str: converted utf8 string
     """
 
-    hex_data = "{0:0>4X}".format(int(bin_data, 2))
+    dec_data = int(bin_data, 2)
+    hex_data = str(hex(dec_data))[2:]
+
+    # Fix for '0' in the front is lost in translation
+    # Also for bytes.fromhex only even length of chars is valid
+    if len(hex_data) % 2 != 0:
+        hex_data = '0'+hex_data
+
     bytes_str = bytes.fromhex(hex_data)
     decoded_str = bytes_str.decode()
 
@@ -79,3 +86,28 @@ def bin_to_str(bin_data):
 
 def split_to_groups(data, group_len):
     return [data[i:i+group_len] for i in range(0, len(data), group_len)]
+
+
+def split_binary(bin_data, group_len):
+    bin_groups = []
+    bin_group = ''
+    i = 0
+    for bool in bin_data:
+        if i < group_len:
+            bin_group += bool
+
+        # If the next bool is zero, append it to current group 
+        else:
+            if bool == '0':
+                bin_group += bool
+            else:
+                bin_groups.append(bin_group)
+                bin_group = bool
+                i = 0
+        i += 1
+    
+    if bin_group:
+        bin_groups.append(bin_group)
+    
+    return bin_groups
+
