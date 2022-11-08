@@ -1,4 +1,4 @@
-"""
+"""Class that handles simple RSA encryption
 
 Helpful resources:
 https://www.comparitech.com/blog/information-security/rsa-encryption/ (understanding rsa)
@@ -80,6 +80,15 @@ class RSA():
     
 
     def encrypt(self, message):
+        """Splits the message to groups and encrypts the groups
+
+        Args:
+            message (str): text to encrypt
+
+        Returns:
+            string: encrypted groups separated by a space character
+        """
+
         n = self.public_key[0]
         e = self.public_key[1]
 
@@ -96,22 +105,34 @@ class RSA():
             pow_result = pow(num, e, n)
             result += str(pow_result)
             # Output formatting
-            if i < len(bin_message_groups)-1: result += "\n"
+            if i < len(bin_message_groups)-1: result += " "
 
         return result
     
 
     def decrypt(self, encrypted):
+        """Decrypts the encrypted message
+
+        Args:
+            encrypted (str): encrypted groups separated by a space character
+
+        Returns:
+            str: decrypted string
+        """
+
         n = self.private_key[0]
         d = self.private_key[1]
 
-        encrypted_groups = encrypted.split("\n")
+        # Split encrypted input into groups
+        encrypted_groups = encrypted.split(" ")
 
+        # Decrypt groups and join the output
         decrypted_bits = ""
         for group in encrypted_groups:
             decrypted_num = pow(int(group), d, n)
             decrypted_bits += str(bin(decrypted_num)[2:])
         
+        # Decode binary to string
         decrypted_string = h.bin_to_str(decrypted_bits)
 
         return decrypted_string

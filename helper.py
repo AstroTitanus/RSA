@@ -1,3 +1,6 @@
+"""Library with helper functions for rsa encryption
+"""
+
 from primes import random_prime
 
 def gcd(a, b):
@@ -12,8 +15,7 @@ def gcd(a, b):
     """
 
     if (a < 1 or b < 1):
-        print("Error: Cislo 'a' aj cislo 'b' musia byt vacsie ako 0!")
-        return -1
+        raise Exception("Can't find gcd if both numbers are not bigger than 0")
     
     while b != 0:
         temp = a
@@ -85,6 +87,21 @@ def bin_to_str(bin_data):
 
 
 def split_binary(bin_data, group_len):
+    """Splits string of binary data into groups that start with '1'
+
+    This function splits binary data into groups with a minimum length
+    of group_len. This length can be bigger - the group can't start
+    with a zero because of possible data loss when converting back
+    to string from binary data.
+
+    Args:
+        bin_data (str): string of binary data
+        group_len (int): length of split groups
+
+    Returns:
+        list: list of split strings of binary data
+    """
+
     bin_groups = []
     bin_group = ''
     i = 0
