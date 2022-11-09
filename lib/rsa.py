@@ -11,7 +11,18 @@ import lib.helper as h
 
 class RSA():
     
-    def __init__(self, prime_len = 26):
+    def __init__(self, prime_len = 21):
+        """Constructor for RSA class.
+
+        Args:
+            prime_len (int, optional): length of generated primes, must be 5 or more. Defaults to 21.
+        """
+
+        self.errors = []
+        if prime_len < 4:
+            self.errors.append("Length of the generated prime must be 5 or more")
+            return
+
         self.prime_len = prime_len
         self.primes = self.__primes()
         self.public_key = self.__public_key()
@@ -79,11 +90,12 @@ class RSA():
         return (prime_multiple, d)
     
 
-    def encrypt(self, message):
+    def encrypt(self, message, public_key=()):
         """Splits the message to groups and encrypts the groups
 
         Args:
             message (str): text to encrypt
+            public_key (touple, optional): public key pair (n, e) for encryption with custom key pair. Defaults to ().
 
         Returns:
             string: encrypted groups separated by a space character
@@ -92,11 +104,20 @@ class RSA():
         n = self.public_key[0]
         e = self.public_key[1]
 
+        # Set n and e from function argument if it was passed
+        if public_key:
+            # Probably should do some verification if key pair is valid here
+            if len(public_key) == 2:
+                n = public_key[0]
+                e = public_key[1]
+            
+            self.errors.append("Public key must be a touple (n, e) where n and e are int.")
+
         # Convert message to binary
         bin_message = h.str_to_bin(message)
 
         # Split binary to groups
-        bin_message_groups = h.split_binary(bin_message, 32)
+        bin_message_groups = h.split_binary(bin_message, 11*6)
 
         # Encrypting
         result = ""
@@ -110,11 +131,12 @@ class RSA():
         return result
     
 
-    def decrypt(self, encrypted):
+    def decrypt(self, encrypted, private_key=()):
         """Decrypts the encrypted message
 
         Args:
             encrypted (str): encrypted groups separated by a space character
+            private_key (touple, optional): private key pair (n, d) for decryption with custom key pair. Defaults to ().
 
         Returns:
             str: decrypted string
@@ -122,6 +144,15 @@ class RSA():
 
         n = self.private_key[0]
         d = self.private_key[1]
+
+        # Set n and d from function argument if it was passed
+        if private_key:
+            # Probably should do some verification if key pair is valid here
+            if len(private_key) == 2:
+                n = private_key[0]
+                d = private_key[1]
+            
+            self.errors.append("Private key must be a touple (n, d) where n and d are int.")
 
         # Split encrypted input into groups
         encrypted_groups = encrypted.split(" ")
@@ -131,7 +162,7 @@ class RSA():
         for group in encrypted_groups:
             decrypted_num = pow(int(group), d, n)
             decrypted_bits += str(bin(decrypted_num)[2:])
-        
+
         # Decode binary to string
         decrypted_string = h.bin_to_str(decrypted_bits)
 

@@ -41,8 +41,8 @@ for i in range(1000):
     random_str = random_string(alphabet)
 
     # Encrypt the generated string and decrypt it
-    encrypted = rsa.encrypt(random_str)
-    decrypted = rsa.decrypt(encrypted)
+    encrypted = rsa.encrypt(random_str, (rsa.public_key[0], rsa.public_key[1]))
+    decrypted = rsa.decrypt(encrypted, (rsa.private_key[0], rsa.private_key[1]))
 
     # If generated string and decrypted string are not equal
     # print out some debug information

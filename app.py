@@ -1,104 +1,97 @@
 # Importing
-from flask import Flask, render_template, request, send_file, redirect
-from werkzeug.utils import secure_filename
-import os
-import sys
-
+from flask import Flask, render_template, request
 
 # Importing custom libs
 from lib.rsa import RSA
 
-
 # Env setup
 app = Flask(__name__)
 
+# Mini helper
+def get_missing_data(data_arr, expected_arr):
+    missing = []
+    for expected_item in expected_arr:
+        if expected_item not in data_arr:
+            missing.append(f"Oops, {expected_item} seems to be missing.")
+    
+    return missing
+
+def get_clear_data():
+    rsa = RSA()
+    data = {}
+    data['prime_p'] = rsa.primes['p']
+    data['prime_q'] = rsa.primes['q']
+    data['public_key_n'] = rsa.public_key[0]
+    data['public_key_e'] = rsa.public_key[1]
+    data['private_key_n'] = rsa.private_key[0]
+    data['private_key_d'] = rsa.private_key[1]
+
+    return data
+
 
 # Flask endpoints
-@app.route('/', methods=["GET"])
+@app.route('/', methods=["GET", "POST"])
 def main_page():
+    # GET REQUEST
     if request.method == 'GET':
-        return render_template("choice.html")
-
-
-@app.route('/encrypt', methods=["GET", "POST"])
-def encode():
-    if request.method == 'GET':
-        return render_template("encode.html", error_data = {})
-
-    # First validate input data
-    validity, error_data = validate_input_encode(request.form, request.files)
-    if not validity:
-        return render_template("encode.html", error_data = error_data, was_validated = "was-validated")
-
-    # At this point we are sure the data is valid
-    image = request.files["image"]
-    message = request.form["message"]
-
-    # Remove old image/s
-    remove_all_from_dir("images")
-    remove_all_from_dir("encoded_images")
-
-    # Save new image
-    img_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(image.filename))
-    image.save(img_path)
-
-    # Generate encoded image
-    encoded_img_name = secure_filename(image.filename).split('.')[0] + "_encoded.png"
-    encoded_img_path = f"encoded_images/{encoded_img_name}"
-    try:
-        result = encode_to_img(img_path, message, encoded_img_path)
-        if result != None and "ERROR" in result:
-            return render_template("error.html", error_message = result)
-    except:
-        return render_template("error.html", error_message = "Oops, this wasn't supposed to happen. Try again.")
-        
-    img_capacity = get_img_capacity(img_path)
-    if type(img_capacity) != int and  "ERROR" in img_capacity:
-        return render_template("error.html", error_message = img_capacity)
-
-    return render_template("encode_success.html", img_capacity = img_capacity, download_path = encoded_img_path)
-
-
-@app.route('/decode', methods=["GET", "POST"])
-def decode():
-    if request.method == 'GET':
-        return render_template("decode.html", error_data = {})
-
-    # First validate input data
-    validity, error_data = validate_input_decode(request.files)
-    if not validity:
-        return render_template("decode.html", error_data = error_data, was_validated = "was-validated")
-
-    # At this point we are sure the data is valid
-    image = request.files["image"]
+        data = get_clear_data()
+        return render_template("rsa.html", data = data)
     
-    # Remove old image/s
-    remove_all_from_dir("images_to_decode")
+    # POST REQUEST
+    # Missing data handling
+    print(request.form.keys())
+    missing_data_errors = get_missing_data(request.form.keys(), ['action','prime_p', 'prime_q', 'public_key_n', 'public_key_e', 'private_key_n', 'private_key_d'])
+    if missing_data_errors != []:
+        data = get_clear_data()
+        return render_template("rsa.html", data = data, errors = missing_data_errors)
 
-    # Decode message from encoded image
-    img_path = os.path.join("images_to_decode", secure_filename(image.filename))
-    image.save(img_path)
-    try:
-        message = decode_from_img(img_path)
-    except:
-        return render_template("error.html", error_message = "Oops, this wasn't supposed to happen. Try again.")
+    # Getting data
+    action = request.form.get('action')
+    prime_p = request.form.get('prime_p')
+    prime_q = request.form.get('prime_q')
 
-    return render_template("decode.html", decoded_message = message, error_data = {})
+    public_key_n = request.form.get('public_key_n') 
+    public_key_e = request.form.get('public_key_e') 
+    private_key_n = request.form.get('private_key_n') 
+    private_key_d = request.form.get('private_key_d')
+    # Should check if public and private n are equal
 
+    # TODO: Should check if inputs are really valid numbers
+    public_key = (int(public_key_n), int(public_key_e))
+    private_key = (int(private_key_n), int(private_key_d))
 
-@app.route('/download', methods=["GET"])
-def download():
-    if request.method == 'GET':
-        encoded_img_path = request.args.get("path")
+    # Format data output
+    data = {}
+    data['prime_p'] = prime_p
+    data['prime_q'] = prime_q
+    data['public_key_n'] = public_key_n
+    data['public_key_e'] = public_key_e
+    data['private_key_n'] = private_key_n
+    data['private_key_d'] = private_key_d
 
-        if encoded_img_path.strip() == "":
-            return render_template("error.html", error_message = "Oh no, the path to the image looked very empty. Try again.")
-
+    # Encrypting
+    rsa = RSA()
+    if action.lower() == 'encrypt':
+        data['to_encrypt'] = request.form.get('to_encrypt')
         try:
-            return send_file(encoded_img_path, as_attachment=True)
-        except:
-            return render_template("error.html", error_message = "Gosh, looks like the file you are looking for is not here.")
+            encrypted = rsa.encrypt(data['to_encrypt'], public_key)
+        except Exception as e:
+            data = get_clear_data()
+            return render_template("rsa.html", data = data, errors = ['Oops, something went wrong while encrypting. Try again!'])
+        data['encrypted'] = encrypted
 
+    # Decrypting
+    elif action.lower() == 'decrypt':
+        data['to_encrypt'] = request.form.get('to_encrypt')
+        data['encrypted'] = request.form.get('to_decrypt')
+        try:
+            decrypted = rsa.decrypt(data['encrypted'], private_key)
+        except Exception as e:
+            data = get_clear_data()
+            return render_template("rsa.html", data = data, errors = ['Oops, something went wrong while decrypting. Try again!'])
+        data['decrypted'] = decrypted
+
+    return render_template('rsa.html', data=data)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

@@ -1,0 +1,107 @@
+{% extends "base_layout.html" %}
+
+{% block heading %}
+    <div class="heading-container mb-4">
+        <h1 id="app-name">RSA Encrypter 9000</h1>
+    </div>
+{% endblock heading %}
+
+{% block content %}
+    <form action="/" method="post" enctype="multipart/form-data" id="form" class="{{ was_validated }}">
+
+        {% for error in errors %}
+        <div class="alert alert-danger text-center" role="alert">
+            {{ error }}
+        </div>
+        {% endfor %}
+
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Generated prime 'p'</label>
+            <input class="form-control" type="text" value="{{ data['prime_p'] }}" aria-label="readonly input example" disabled readonly>
+            <input class="form-control" type="hidden" name="prime_p" value="{{ data['prime_p'] }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="formFile" class="form-label">Generated prime 'q'</label>
+            <input class="form-control" type="text" value="{{ data['prime_q'] }}" aria-label="readonly input example" disabled readonly>
+            <input class="form-control" type="hidden" name="prime_q" value="{{ data['prime_q'] }}"
+        </div>
+
+        <div class="mb-3">
+            <div class="row g-3">
+                <div class="col">
+                    <label for="formFile" class="form-label">Public key (n)</label>
+                    <input class="form-control" type="text" value="{{ data['public_key_n'] }}" aria-label="readonly input example" disabled readonly>
+                    <input class="form-control" type="hidden" name="public_key_n" value="{{ data['public_key_n'] }}">
+                </div>
+                <div class="col">
+                    <label for="formFile" class="form-label">Public key (e)</label>
+                    <input class="form-control" type="text" value="{{ data['public_key_e'] }}" aria-label="readonly input example" disabled readonly>
+                    <input class="form-control" type="hidden" name="public_key_e" value="{{ data['public_key_e'] }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="row g-3">
+                <div class="col">
+                    <label for="formFile" class="form-label">Private key (n)</label>
+                    <input class="form-control" type="text" value="{{ data['private_key_n'] }}" aria-label="readonly input example" disabled readonly>
+                    <input class="form-control" type="hidden" name="private_key_n" value="{{ data['private_key_n'] }}">
+                </div>
+                <div class="col">
+                    <label for="formFile" class="form-label">Private key (d)</label>
+                    <input class="form-control" type="text" value="{{ data['private_key_d'] }}" aria-label="readonly input example" disabled readonly>
+                    <input class="form-control" type="hidden" name="private_key_d" value="{{ data['private_key_d'] }}">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <a href="/" class="btn btn-primary">Generate new keys</a>
+        </div>
+
+        <div class="mt-5">
+            <div class="row">
+                <div class="col">
+                    <h3>Encryption</h3>
+                    <div class="mb-3">
+                        <label for="to_encrypt" class="form-label">Input Message</label>
+                        <textarea class="form-control" name="to_encrypt" rows="3" placeholder="Top Secret Message Here.." required>{{ data['to_encrypt'] }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="encrypted" class="form-label">Encrypted Output</label>
+                        <textarea class="form-control" name="encrypted" rows="3" placeholder="Encrypted output comes here.." aria-label="readonly input example" disabled readonly>{{ data['encrypted']}}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">Encrypt</button>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <h3>Decryption</h3>
+                    <div class="mb-3">
+                        <label for="to_decrypt" class="form-label">Encrypted Message</label>
+                        <textarea class="form-control" name="to_decrypt" rows="3" placeholder="Top Secret Message Here..">{{ data['encrypted']}}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="decrypted" class="form-label">Decrypted Output</label>
+                        <textarea class="form-control" name="decrypted" rows="3" placeholder="Decrypted output comes here.." aria-label="readonly input example" disabled readonly>{{ data['decrypted'] }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">Decrypt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+        
+
+    </form>
+{% endblock content %}
